@@ -1,0 +1,12 @@
+{
+  "name": "qualtrics-chat-proxy",
+  "version": "1.0.0",
+  "description": "Petit proxy pour appeler l'API OpenAI depuis Qualtrics via Vercel",
+  "main": "api/chat.js",
+  "scripts": {
+    "start": "node api/chat.js"
+  },
+  "dependencies": {
+    "openai": "^4.0.0"
+  }
+}
