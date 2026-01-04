@@ -3,26 +3,28 @@ import OpenAI from "openai";
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export default async function handler(req, res) {
+  // ✅ CORS IMMÉDIAT (AVANT TOUT)
   const origin = req.headers.origin;
-  
-  // 🎯 TON CODE CORS PARFAIT
   if (origin && origin.endsWith('.qualtrics.com')) {
     res.setHeader("Access-Control-Allow-Origin", origin);
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", "*"); // Fallback
   }
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("Vary", "Origin");
-  
+
   if (req.method === "OPTIONS") {
     return res.status(204).end();
   }
-  
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
-  
+
   try {
-    const { prompt, system, history, model, temperature, max_tokens } = req.body;
+    const body = req.body || {};
+    const { prompt, system, history, model, temperature, max_tokens } = body;
     
     const messages = [];
     if (system) messages.push({ role: "system", content: system });
@@ -36,9 +38,7 @@ export default async function handler(req, res) {
       max_tokens: max_tokens ?? 300,
     });
 
-    const text = completion.choices[0].message.content;
-    res.status(200).json({ text });
-    
+    res.status(200).json({ text: completion.choices[0].message.content });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "OpenAI request failed" });
