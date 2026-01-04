@@ -1,36 +1,31 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({
+const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
 export default async function handler(req, res) {
 
-  // =========================
-  // CORS — TOUJOURS EN PREMIER
-  // =========================
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Max-Age", "86400");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") {
     return res.status(204).end();
   }
 
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({ error: "Only POST allowed" });
   }
 
   try {
     const {
-      prompt,
+      history = [],
       system,
-      history,
       model = "gpt-4o-mini",
       temperature = 0.7,
       max_tokens = 300
-    } = req.body || {};
+    } = req.body;
 
     const messages = [];
 
@@ -40,23 +35,24 @@ export default async function handler(req, res) {
 
     if (Array.isArray(history)) {
       messages.push(...history);
-    } else if (prompt) {
-      messages.push({ role: "user", content: prompt });
     }
 
-    const completion = await openai.chat.completions.create({
+    const response = await client.responses.create({
       model,
-      messages,
+      input: messages,
       temperature,
-      max_tokens
+      max_output_tokens: max_tokens
     });
 
     res.status(200).json({
-      text: completion.choices[0].message.content
+      text: response.output_text
     });
 
   } catch (err) {
-    console.error("OpenAI error:", err);
-    res.status(500).json({ error: "OpenAI request failed" });
+    console.error("OPENAI ERROR:", err);
+    res.status(500).json({
+      error: "OpenAI failed",
+      details: err.message
+    });
   }
 }
