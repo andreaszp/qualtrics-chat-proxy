@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Proxy pour Qualtrics vers OpenAI",
-  "main": "api/chat.js",
+  "main": "api/dog.js",
   "scripts": {
-    "dev": "node api/chat.js"
+    "dev": "node api/dog.js"
   },
   "dependencies": {
     "openai": "^4.52.0"
