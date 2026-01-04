@@ -1,18 +1,20 @@
-// AJOUT CORS AU DÉBUT
-export default async function handler(req, res) {
-  // Gérer les requêtes OPTIONS (preflight CORS)
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.status(200).end();
-    return;
-  }
+import OpenAI from "openai";
 
-  // CORS pour toutes les réponses
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+export default async function handler(req, res) {
+  // ✅ CORS : TOUTES les requêtes
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // ✅ OPTIONS preflight (Qualtrics l'envoie avant POST)
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
 
   // Ton code original
   if (req.method !== "POST") {
@@ -27,10 +29,6 @@ export default async function handler(req, res) {
     if (Array.isArray(history)) messages.push(...history);
     else if (prompt) messages.push({ role: "user", content: prompt });
 
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
     const completion = await openai.chat.completions.create({
       model: model || "gpt-4o-mini",
       messages: messages,
@@ -43,6 +41,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "OpenAI request failed" });
+    res.status(500).json({ error: "OpenAI request failed", details: error.message });
   }
 }
