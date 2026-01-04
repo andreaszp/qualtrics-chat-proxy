@@ -1,7 +1,6 @@
 {
   "functions": {
     "api/dog.js": {
-      "runtime": "nodejs18.x",
       "maxDuration": 30
     }
   }
