@@ -6,6 +6,7 @@ const openai = new OpenAI({
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
+    console.log("methode non trouvée");
     return res.status(405).json({ error: "Method not allowed andrea" });
   }
 
